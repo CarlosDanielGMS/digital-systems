@@ -60,6 +60,7 @@ target_include_directories(logic-gates PRIVATE
 target_link_libraries(logic-gates 
         hardware_i2c
         hardware_pio
+        hardware_adc
 )
 
 pico_add_extra_outputs(logic-gates)
