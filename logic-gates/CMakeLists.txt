@@ -35,7 +35,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(logic-gates logic-gates.c )
+add_executable(logic-gates logic-gates.c inc/ssd1306_i2c.c)
 
 pico_set_program_name(logic-gates "logic-gates")
 pico_set_program_version(logic-gates "0.1")
@@ -60,8 +60,6 @@ target_include_directories(logic-gates PRIVATE
 target_link_libraries(logic-gates 
         hardware_i2c
         hardware_pio
-        
-        )
+)
 
 pico_add_extra_outputs(logic-gates)
-
