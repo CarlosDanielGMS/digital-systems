@@ -359,6 +359,6 @@ void setLED(char color)
 
 void readButtons()
 {
-    buttonAisPressed = !gpio_get(BUTTON_A_PIN);
-    buttonBisPressed = !gpio_get(BUTTON_B_PIN);
+    buttonAisPressed = gpio_get(BUTTON_A_PIN);
+    buttonBisPressed = gpio_get(BUTTON_B_PIN);
 }
