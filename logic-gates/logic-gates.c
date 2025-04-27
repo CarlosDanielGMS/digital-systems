@@ -16,6 +16,16 @@
 #define PRESSED 0
 #define NOT_PRESSED 1
 
+#define AND 1
+#define OR 2
+#define NOT 3
+#define NAND 4
+#define NOR 5
+#define XOR 6
+#define XNOR 7
+
+#define BUTTON_A_PIN 5
+#define BUTTON_B_PIN 6
 #define DISPLAY_SDA_PIN 14
 #define DISPLAY_SCL_PIN 15
 #define RESET_BUTTON_PIN 22
@@ -52,11 +62,15 @@ unsigned int redLedSlice, greenLedSlice, blueLedSlice;
 unsigned int previousLogicGate = 1;
 unsigned int currentLogicGate = 1;
 
+bool buttonAisPressed = false;
+bool buttonBisPressed = false;
+
 void wait(unsigned long int milliseconds);
 void initializeComponents();
 void setDisplay(char *message);
 void readJoystickValue();
 void setLED(char color);
+void readButtons();
 
 int main()
 {
@@ -105,6 +119,91 @@ int main()
             previousLogicGate = currentLogicGate;
         }
 
+        readButtons();
+
+        switch (currentLogicGate)
+        {
+        case AND:
+            if (buttonAisPressed && buttonBisPressed)
+            {
+                setLED(GREEN);
+            }
+            else
+            {
+                setLED(RED);
+            }
+            break;
+            
+        case OR:
+            if (buttonAisPressed || buttonBisPressed)
+            {
+                setLED(GREEN);
+            }
+            else
+            {
+                setLED(RED);
+            }
+            break;
+
+        case NOT:
+            if (!buttonAisPressed)
+            {
+                setLED(GREEN);
+            }
+            else
+            {
+                setLED(RED);
+            }
+            break;
+
+        case NAND:
+            if (buttonAisPressed && buttonBisPressed)
+            {
+                setLED(RED);
+            }
+            else
+            {
+                setLED(GREEN);
+            }
+            break;
+
+        case NOR:
+            if (!buttonAisPressed && !buttonBisPressed)
+            {
+                setLED(GREEN);
+            }
+            else
+            {
+                setLED(RED);
+            }
+            break;
+
+        case XOR:
+            if (buttonAisPressed != buttonBisPressed)
+            {
+                setLED(GREEN);
+            }
+            else
+            {
+                setLED(RED);
+            }
+            break;
+
+        case XNOR:
+            if (buttonAisPressed == buttonBisPressed)
+            {
+                setLED(GREEN);
+            }
+            else
+            {
+                setLED(RED);
+            }
+            break;
+        
+        default:
+            break;
+        }
+
         if (gpio_get(RESET_BUTTON_PIN) == PRESSED)
         {
             reset_usb_boot(0, 0);
@@ -115,9 +214,9 @@ int main()
             
             if (joystickXValue > 3584)
             {
-                if (currentLogicGate == 7)
+                if (currentLogicGate == XNOR)
                 {
-                    currentLogicGate = 1;
+                    currentLogicGate = AND;
                 }
                 else
                 {
@@ -126,9 +225,9 @@ int main()
             }
             else if (joystickXValue < 512)
             {
-                if (currentLogicGate == 1)
+                if (currentLogicGate == AND)
                 {
-                    currentLogicGate = 7;
+                    currentLogicGate = XNOR;
                 }
                 else
                 {
@@ -191,6 +290,14 @@ void initializeComponents()
     pwm_set_wrap(blueLedSlice, PWM_PERIOD);
     pwm_set_gpio_level(BLUE_LED_PIN, blueLedPwmLevel);
     pwm_set_enabled(blueLedSlice, true);
+
+    gpio_init(BUTTON_A_PIN); 
+    gpio_set_dir(BUTTON_A_PIN, GPIO_IN);
+    gpio_pull_up(BUTTON_A_PIN);
+
+    gpio_init(BUTTON_B_PIN);
+    gpio_set_dir(BUTTON_B_PIN, GPIO_IN);
+    gpio_pull_up(BUTTON_B_PIN);   
 }
 
 void setDisplay(char *message)
@@ -248,4 +355,10 @@ void setLED(char color)
     pwm_set_gpio_level(BLUE_LED_PIN, OFF);
     break;
     }
+}
+
+void readButtons()
+{
+    buttonAisPressed = !gpio_get(BUTTON_A_PIN);
+    buttonBisPressed = !gpio_get(BUTTON_B_PIN);
 }
