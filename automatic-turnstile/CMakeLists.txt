@@ -61,8 +61,8 @@ target_link_libraries(automatic-turnstile
         hardware_spi
         hardware_i2c
         hardware_pio
-        
-        )
+        hardware_adc
+)
 
 pico_add_extra_outputs(automatic-turnstile)
 
