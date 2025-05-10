@@ -16,7 +16,7 @@
 #define PRESSED 0
 #define NOT_PRESSED 1
 #define LIGHT_OFF 0
-#define LIGHT_ON 128
+#define LIGHT_ON 192
 #define OFF 0
 #define ON 1024
 
