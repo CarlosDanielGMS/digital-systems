@@ -35,7 +35,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(automatic-turnstile automatic-turnstile.c )
+add_executable(automatic-turnstile automatic-turnstile.c inc/ssd1306_i2c.c)
 
 pico_set_program_name(automatic-turnstile "automatic-turnstile")
 pico_set_program_version(automatic-turnstile "0.1")
