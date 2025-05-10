@@ -222,7 +222,7 @@ void initializeComponents()
         sm = pio_claim_unused_sm(np_pio, true);
     }
     ws2818b_program_init(np_pio, sm, offset, LED_MATRIX_PIN, 800000.f);
-    for (unsigned char led = 5; led < LED_COUNT; led++)
+    for (unsigned char led = 0; led < LED_COUNT; led++)
     {
         setMatrix(led, TURN_OFF);
     }
