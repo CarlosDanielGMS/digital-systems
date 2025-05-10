@@ -67,6 +67,7 @@ struct render_area frame_area = {
     end_page : ssd1306_n_pages - 1
 };
 
+bool restartButtonStatus = NOT_PRESSED;
 bool resetButtonStatus = NOT_PRESSED;
 bool joystickButtonStatus = NOT_PRESSED;
 
@@ -94,7 +95,6 @@ bool grStatus = false;
 bool hoStatus = false;
 bool diStatus = false;
 bool ptStatus = false;
-bool ctStatus = false;
 
 void wait(unsigned long int milliseconds);
 void initializeComponents();
@@ -104,23 +104,27 @@ void updateDisplay();
 void readJoystickDirection();
 void setMatrix(unsigned char led, unsigned char color);
 void setLED(char color);
+void toggleEntryValue(unsigned char entry);
+void updateResult();
 
 int main()
 {
     initializeComponents();
+    updateResult();
 
     while (true)
     {
         updateDisplay();
         readButtons();
-
+        
         if (resetButtonStatus == PRESSED)
         {
             reset_usb_boot(0, 0);
         }
         else if (joystickButtonStatus == PRESSED)
         {
-            // Next
+            toggleEntryValue(currentEntry);
+            wait(100);
         }
         else
         {
@@ -149,7 +153,7 @@ int main()
                 }
             }
 
-            wait(150);
+            wait(100);
         }
     }
 }
@@ -182,6 +186,9 @@ void initializeComponents()
     calculate_render_area_buffer_length(&frame_area);
     setDisplay("Inicializando");
 
+    gpio_init(JOYSTICK_BUTTON_PIN);
+    gpio_set_dir(JOYSTICK_BUTTON_PIN, IN);
+    gpio_pull_up(JOYSTICK_BUTTON_PIN);
     adc_init();
     adc_gpio_init(JOYSTICK_X_AXIS_PIN);
     adc_gpio_init(JOYSTICK_Y_AXIS_PIN);
@@ -215,17 +222,20 @@ void initializeComponents()
         sm = pio_claim_unused_sm(np_pio, true);
     }
     ws2818b_program_init(np_pio, sm, offset, LED_MATRIX_PIN, 800000.f);
-    for (unsigned char led = 0; led < LED_COUNT; led++)
+    for (unsigned char led = 5; led < LED_COUNT; led++)
     {
         setMatrix(led, TURN_OFF);
     }
-    
+    setMatrix(GR_LED, RED);
+    setMatrix(HO_LED, RED);
+    setMatrix(DI_LED, RED);
+    setMatrix(PT_LED, RED);
 }
 
 void readButtons()
 {
     resetButtonStatus = gpio_get(RESET_BUTTON_PIN);
-    joystickButtonStatus = !gpio_get(JOYSTICK_BUTTON_PIN);
+    joystickButtonStatus = gpio_get(JOYSTICK_BUTTON_PIN);
 }
 
 void setDisplay(char *message)
@@ -338,15 +348,14 @@ void setMatrix(unsigned char led, unsigned char color)
         leds[led].B = LIGHT_OFF;
         break;
     }
-    
-    for (unsigned char i = 0; i < LED_COUNT; ++i)
+
+    for (uint i = 0; i < LED_COUNT; ++i)
     {
         pio_sm_put_blocking(np_pio, sm, leds[i].G);
         pio_sm_put_blocking(np_pio, sm, leds[i].R);
         pio_sm_put_blocking(np_pio, sm, leds[i].B);
     }
-    
-    sleep_us(100);
+    wait(50);
 }
 
 void setLED(char color)
@@ -382,5 +391,81 @@ void setLED(char color)
         pwm_set_gpio_level(GREEN_LED_PIN, OFF);
         pwm_set_gpio_level(BLUE_LED_PIN, OFF);
         break;
+    }
+}
+
+void toggleEntryValue(unsigned char entry)
+{
+    switch (entry)
+    {
+    case GR_OPTION:
+        if (grStatus == false)
+        {
+            grStatus = true;
+            setMatrix(GR_LED, GREEN);
+        }
+        else
+        {
+            grStatus = false;
+            setMatrix(GR_LED, RED);
+        }
+        break;
+
+    case HO_OPTION:
+        if (hoStatus == false)
+        {
+            hoStatus = true;
+            setMatrix(HO_LED, GREEN);
+        }
+        else
+        {
+            hoStatus = false;
+            setMatrix(HO_LED, RED);
+        }
+        break;
+
+    case DI_OPTION:
+        if (diStatus == false)
+        {
+            diStatus = true;
+            setMatrix(DI_LED, GREEN);
+        }
+        else
+        {
+            diStatus = false;
+            setMatrix(DI_LED, RED);
+        }
+        break;
+
+    case PT_OPTION:
+        if (ptStatus == false)
+        {
+            ptStatus = true;
+            setMatrix(PT_LED, GREEN);
+        }
+        else
+        {
+            ptStatus = false;
+            setMatrix(PT_LED, RED);
+        }
+        break;
+
+    default:
+        setDisplay("Erro");
+        break;
+    }
+
+    updateResult();
+}
+
+void updateResult()
+{
+    if ((grStatus == true && hoStatus == true && diStatus == true) || (ptStatus == true))
+    {
+        setLED(GREEN);
+    }
+    else
+    {
+        setLED(RED);
     }
 }
