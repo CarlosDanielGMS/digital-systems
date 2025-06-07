@@ -36,6 +36,8 @@ void setDisplay(char *message);
 int main()
 {
     initializeComponents();
+
+    setDisplay("Press B");
     
     while (true) {
         readButtons();
