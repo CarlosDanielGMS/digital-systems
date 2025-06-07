@@ -144,6 +144,7 @@ void readRegister()
     sleep_us(1);
 
     gpio_put(IC_LOAD_PIN, HIGH);
+    sleep_us(1);
 
     for (unsigned char i = 0; i < 8; i++)
     {
