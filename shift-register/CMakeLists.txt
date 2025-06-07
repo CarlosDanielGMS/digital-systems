@@ -35,7 +35,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(shift-register shift-register.c )
+add_executable(shift-register shift-register.c inc/ssd1306_i2c.c)
 
 pico_set_program_name(shift-register "shift-register")
 pico_set_program_version(shift-register "0.1")
