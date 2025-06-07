@@ -19,6 +19,7 @@ bool showButtonStatus = NOT_PRESSED;
 
 void initializeComponents();
 void readButtons();
+void resetIntoBootselMode();
 
 int main()
 {
@@ -29,7 +30,7 @@ int main()
 
         if (resetButtonStatus == PRESSED)
         {
-            reset_usb_boot(0, 0);
+            resetIntoBootselMode();
         }
         else if (showButtonStatus == PRESSED)
         {
@@ -55,4 +56,9 @@ void readButtons()
 {
     resetButtonStatus = gpio_get(RESET_BUTTON_PIN);
     showButtonStatus = gpio_get(SHOW_BUTTON_PIN);
+}
+
+void resetIntoBootselMode()
+{
+    reset_usb_boot(0, 0);
 }
